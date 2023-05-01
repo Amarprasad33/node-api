@@ -15,6 +15,7 @@ mongoose.connect("mongodb://127.0.0.1:27017", {
 const userSchema = new mongoose.Schema({
     name: String,
     email: String,
+    password: String,
 })
 
 const User = mongoose.model("User", userSchema);
@@ -37,7 +38,7 @@ const isAuthenticated = async (req, res, next) => {
         req.user = await User.findById(decodedData._id);
         next();
     } else {
-        res.render("login");
+        res.redirect("/login");
     }
 }
 
@@ -45,12 +46,43 @@ app.get("/", isAuthenticated, (req, res) => {
     res.render("logout", { name: req.user.name });
 });
 
+app.get("/login", (req, res) => {
+    res.render("login");
+})
+
+app.get("/register", (req, res) => {
+    res.render("register");
+});
+
 app.post("/login", async (req, res) => {
-    const { name, email } = req.body;
-    const user = await User.create({
+    const { email, password } = req.body;
+
+    let user = await User.findOne({ email });
+    if(!user) return res.redirect("/register");
+    const isMatch = user.password === password;
+    if(!isMatch) return res.render("login", {message: "Incorrect Password"});
+
+    // Making a josnWEBtoken so that we will not reveal cookie token to random users
+    const token = jwt.sign({_id: user._id}, "kd2bvu204n0vjw",);
+    res.cookie("token", token, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 60 * 1000),
+    });
+    res.redirect("/");
+})
+ 
+app.post("/register", async (req, res) => {
+    const { name, email, password } = req.body;
+    let user = await User.findOne({ email });
+    if(user){
+        return res.redirect("/login")
+    }
+
+    user = await User.create({
         name, 
         email,
-    })
+        password,
+    });
 
     // Making a josnWEBtoken so that we will not reveal cookie token to random users
     const token = jwt.sign({_id: user._id}, "kd2bvu204n0vjw",);
@@ -69,15 +101,6 @@ app.get("/logout", (req, res) => {
     res.redirect("/");
 })
 
-app.get("/add", async (req, res) => {
-
-    await Message.create({
-        name: "Black Billa",
-        email: "joshilaBilla@gmail.com"
-    })
-    res.send("Nice");
-
-});
 
 
 
