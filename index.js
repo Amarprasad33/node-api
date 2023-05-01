@@ -12,12 +12,12 @@ mongoose.connect("mongodb://127.0.0.1:27017", {
 .then(() => console.log("Database Connected -:)"))
 .catch((error) => console.log(error))
 
-const messageSchema = new mongoose.Schema({ 
+const userSchema = new mongoose.Schema({ 
     name: String,
     email: String,
  })
 
-const Message = mongoose.model("Message",messageSchema);
+const User = mongoose.model("User",userSchema);
 
 const app = express();
 
@@ -30,19 +30,31 @@ app.use(cookieParser());
 // Setting up the view Engine
 app.set("view engine", "ejs");
 
-app.get("/", (req, res) => {
+const isAuthenticated = (req, res, next) => {
     const { token } = req.cookies;
     if(token){
-        res.render("logout");
+        next();
     } else{
         res.render("login");
     }
+}
+
+app.get("/", isAuthenticated, (req, res) => {
+    res.render("logout");
 });
 
 app.post("/login", (req, res) => {
     res.cookie("token", "iaminboii",{
         httpOnly: true,
         expires: new Date(Date.now()+60*1000)
+    });
+    res.redirect("/");
+})
+
+app.get("/logout", (req, res) => {
+    res.cookie("token", null,{
+        httpOnly: true,
+        expires: new Date(Date.now())
     });
     res.redirect("/");
 })
@@ -57,21 +69,7 @@ app.get("/add", async (req, res) => {
 
 });
 
-app.get("/success", (req, res) => {
-    res.render("success");
-});
 
-app.post("/contact", async (req, res) => {
-    const { name, email } =  req.body;
-    await Message.create({ name, email });
-    res.redirect("/success");
-});
-
-app.get("/users", (req, res) => {
-    res.json({
-        users,
-    })
-});
 
 
 app.listen(5000, () => {
