@@ -1,6 +1,8 @@
 import express from "express";
 import path from "path";
 import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+
 
 
 // Database Part
@@ -23,13 +25,27 @@ const app = express();
 // Using Middlewares
 app.use(express.static(path.join(path.resolve(), "public")));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Setting up the view Engine
 app.set("view engine", "ejs");
 
 app.get("/", (req, res) => {
-    res.render("index", {name: "Amar Prasad"});
+    const { token } = req.cookies;
+    if(token){
+        res.render("logout");
+    } else{
+        res.render("login");
+    }
 });
+
+app.post("/login", (req, res) => {
+    res.cookie("token", "iaminboii",{
+        httpOnly: true,
+        expires: new Date(Date.now()+60*1000)
+    });
+    res.redirect("/");
+})
 
 app.get("/add", async (req, res) => {
     
