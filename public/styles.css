@@ -49,6 +49,26 @@ button {
     padding: 1rem 2rem;
 }
 
+.error{
+    color: red;
+    font-size: 0.9rem;
+    text-align: right;
+    margin: 1rem;
+}
+
+.pass{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+#togglePassword{
+    position: absolute;
+    margin-left: 570px; 
+    cursor: pointer;
+    margin-top: 18px;
+    
+}
 
 
 

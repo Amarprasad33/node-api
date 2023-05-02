@@ -3,6 +3,7 @@ import path from "path";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 
 // Database Part
@@ -60,7 +61,9 @@ app.post("/login", async (req, res) => {
     let user = await User.findOne({ email });
     if(!user) return res.redirect("/register");
     const isMatch = user.password === password;
-    if(!isMatch) return res.render("login", {message: "Incorrect Password"});
+    if(!isMatch) {
+        return res.render("login", {email, message: "Incorrect Password"});
+    }
 
     // Making a josnWEBtoken so that we will not reveal cookie token to random users
     const token = jwt.sign({_id: user._id}, "kd2bvu204n0vjw",);
@@ -77,11 +80,12 @@ app.post("/register", async (req, res) => {
     if(user){
         return res.redirect("/login")
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     user = await User.create({
         name, 
         email,
-        password,
+        password: hashedPassword,
     });
 
     // Making a josnWEBtoken so that we will not reveal cookie token to random users

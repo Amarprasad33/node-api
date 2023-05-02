@@ -6,17 +6,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
 </head>
 <body>
     <main>
         <form method="post" action="/login">
             <h1>Login Now</h1>
-            <input type="text" name="email" placeholder="Email" id="">
-            <input type="password" name="password" placeholder="Password" id="">
-            <p class="error"><%= locals.messagae %></p>
-
+            <input type="text" name="email" placeholder="Email" value="<%= locals.email %>" id="">
+            <div class="pass">
+                <input type="password" name="password" placeholder="Password" id="id_password">
+                <i class="far fa-eye" id="togglePassword" ></i>
+            </div>
+            <p class="error"><%= locals.message %></p>
             <button type="submit">Login</button>
         </form>
     </main>
 </body>
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#id_password');
+
+    togglePassword.addEventListener('click', function (e) {
+        // toggle the type attribute
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        // toggle the eye slash icon
+        this.classList.toggle('fa-eye-slash');
+    });
+</script>
 </html>
