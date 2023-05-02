@@ -60,7 +60,8 @@ app.post("/login", async (req, res) => {
 
     let user = await User.findOne({ email });
     if(!user) return res.redirect("/register");
-    const isMatch = user.password === password;
+    const isMatch = await bcrypt.compare(password, user.password);
+
     if(!isMatch) {
         return res.render("login", {email, message: "Incorrect Password"});
     }
